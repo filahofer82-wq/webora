@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Webora – Tvoříme weby na míru</title>
+  <link rel="icon" href="fotky/logo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    /* ── Reset & Base ───────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── Utility ─────────────────────────────────────── */
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── Background grid ─────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body > * { position: relative; z-index: 1; }
+
+    /* ── Ambient background glow ────────────────────── */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-glow__layer {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0;
+      animation: glowIn 2s ease forwards;
+    }
+
+    /* Primary — hero area, large soft wash */
+    .bg-glow__layer:nth-child(1) {
+      width: 800px;
+      height: 500px;
+      top: -8%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(ellipse, rgba(255,255,255,.04) 0%, transparent 70%);
+      animation: glowIn 2s ease forwards, glowBreathe1 25s ease-in-out 2s infinite;
+    }
+
+    /* Secondary — right side accent, warm-neutral */
+    .bg-glow__layer:nth-child(2) {
+      width: 500px;
+      height: 500px;
+      top: 35%;
+      right: -8%;
+      background: radial-gradient(circle, rgba(180,170,200,.03) 0%, transparent 70%);
+      animation: glowIn 2.5s ease .4s forwards, glowDrift2 30s ease-in-out 2.9s infinite;
+    }
+
+    /* Tertiary — bottom left, very faint */
+    .bg-glow__layer:nth-child(3) {
+      width: 600px;
+      height: 400px;
+      bottom: 5%;
+      left: -5%;
+      background: radial-gradient(ellipse, rgba(160,180,200,.025) 0%, transparent 70%);
+      animation: glowIn 3s ease .8s forwards, glowDrift3 28s ease-in-out 3.8s infinite;
+    }
+
+    @keyframes glowIn {
+      to { opacity: 1; }
+    }
+
+    @keyframes glowBreathe1 {
+      0%, 100% { transform: translateX(-50%) scale(1); opacity: 1; }
+      40%      { transform: translateX(-48%) scale(1.08); opacity: .8; }
+      70%      { transform: translateX(-52%) scale(.95); opacity: 1; }
+    }
+
+    @keyframes glowDrift2 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+      30%      { transform: translate(-40px, 30px) scale(1.06); opacity: .7; }
+      60%      { transform: translate(20px, -20px) scale(.97); opacity: 1; }
+    }
+
+    @keyframes glowDrift3 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 1; }
+      35%      { transform: translate(30px, -25px) scale(1.05); opacity: .75; }
+      65%      { transform: translate(-20px, 15px) scale(.96); opacity: 1; }
+    }
+
+    /* ── Navbar ───────────────────────────────────────── */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      padding: 20px 24px;
+      pointer-events: none;
+    }
+
+    .navbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      padding: 12px 20px;
+      border-radius: 0;
+      background: transparent;
+      border: 1px solid transparent;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      pointer-events: auto;
+      transition: all .5s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    /* Scrolled: container becomes the pill */
+    .navbar.scrolled .container {
+      padding: 12px 36px;
+      background: rgba(14, 14, 14, .8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 100px;
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow:
+        0 4px 24px rgba(0,0,0,.4),
+        0 0 0 1px rgba(255,255,255,.03) inset;
+    }
+
+    .navbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      text-decoration: none;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .navbar-logo img {
+      height: 40px;
+      width: auto;
+      transition: all .3s ease;
+      filter: brightness(1);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,.55);
+      text-decoration: none;
+      font-size: .875rem;
+      font-weight: 500;
+      transition: color .25s ease;
+      white-space: nowrap;
+    }
+
+    .nav-links a:hover { color: #fff; }
+
+    /* Kontakt as CTA pill */
+    .nav-links .nav-cta a {
+      color: #0a0a0a;
+      background: #fff;
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: .8rem;
+      transition: all .25s ease;
+    }
+
+    .nav-links .nav-cta a:hover {
+      background: rgba(255,255,255,.88);
+      transform: translateY(-1px);
+    }
+
+    /* ── Buttons ──────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 22px;
+      border-radius: 12px;
+      font-size: .9rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all .3s cubic-bezier(.4, 0, .2, 1);
+      border: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: #fff;
+      color: #0a0a0a;
+    }
+
+    .btn-primary:hover {
+      background: rgba(255,255,255,.88);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255,255,255,.06);
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,.05);
+      color: #e5e5e5;
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.18);
+      transform: translateY(-2px);
+    }
+
+    /* Mobile menu toggle */
+    .menu-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #fff;
+      border-radius: 2px;
+      transition: all .3s;
+    }
+
+    /* ── Hero ─────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+    }
+
+    .hero-content { max-width: 720px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 18px;
+      border-radius: 100px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      font-size: .8rem;
+      color: #777;
+      margin-bottom: 36px;
+    }
+
+    .hero-badge span { color: #bbb; }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.08;
+      letter-spacing: -.04em;
+      margin-bottom: 22px;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 2vw, 1.1rem);
+      color: #777;
+      max-width: 480px;
+      margin: 0 auto 44px;
+      line-height: 1.75;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-buttons .btn {
+      padding: 14px 30px;
+      font-size: .95rem;
+      border-radius: 14px;
+    }
+
+    /* ── Section common ──────────────────────────────── */
+    section { padding: 110px 0; }
+
+    .section-label {
+      display: inline-block;
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      color: #555;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.03em;
+      margin-bottom: 16px;
+    }
+
+    .section-desc {
+      color: #666;
+      font-size: 1.05rem;
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 72px;
+    }
+
+    .section-header .section-desc { margin: 0 auto; }
+
+    /* ── Features grid ───────────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .feature-card {
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.05);
+      border-radius: 18px;
+      padding: 36px 28px;
+      transition: border-color .4s ease, box-shadow .4s ease, background .4s ease;
+      transform-style: preserve-3d;
+      will-change: transform;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Glow overlay that follows cursor */
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity .4s ease;
+      pointer-events: none;
+      background: radial-gradient(
+        300px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255,255,255,.06) 0%,
+        transparent 100%
+      );
+    }
+
+    .feature-card:hover {
+      background: rgba(255,255,255,.03);
+      border-color: rgba(255,255,255,.12);
+      box-shadow: 0 16px 40px rgba(0,0,0,.3);
+    }
+
+    .feature-card:hover::after {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.04);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 22px;
+      transition: all .3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.1);
+    }
+
+    .feature-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: #aaa;
+      fill: none;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .feature-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 10px;
+      letter-spacing: -.01em;
+    }
+
+    .feature-card p {
+      font-size: .88rem;
+      color: #666;
+      line-height: 1.65;
+    }
+
+    /* ── Contact ──────────────────────────────────────── */
+    .contact { padding-bottom: 120px; }
+
+    .contact-card {
+      max-width: 520px;
+      margin: 0 auto;
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 24px;
+      padding: 48px 40px;
+      transform-style: preserve-3d;
+      will-change: transform;
+      position: relative;
+      overflow: hidden;
+      transition: border-color .4s ease, box-shadow .4s ease, background .4s ease;
+    }
+
+    .contact-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity .4s ease;
+      pointer-events: none;
+      background: radial-gradient(
+        400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(255,255,255,.05) 0%,
+        transparent 100%
+      );
+    }
+
+    .contact-card:hover {
+      border-color: rgba(255,255,255,.1);
+      box-shadow: 0 20px 50px rgba(0,0,0,.3);
+    }
+
+    .contact-card:hover::after {
+      opacity: 1;
+    }
+
+    .form-group { margin-bottom: 22px; }
+
+    .form-group label {
+      display: block;
+      font-size: .82rem;
+      font-weight: 500;
+      color: #888;
+      margin-bottom: 8px;
+      letter-spacing: .01em;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 13px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.07);
+      background: rgba(255,255,255,.03);
+      color: #e5e5e5;
+      font-size: .92rem;
+      font-family: inherit;
+      outline: none;
+      transition: all .3s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: #444;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: rgba(255,255,255,.2);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.03);
+      background: rgba(255,255,255,.04);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    /* Validation styles */
+    .form-group input:invalid:not(:placeholder-shown),
+    .form-group textarea:invalid:not(:placeholder-shown) {
+      border-color: rgba(239, 68, 68, .4);
+    }
+
+    .contact-card .btn-submit {
+      width: 100%;
+      padding: 14px;
+      font-size: .95rem;
+      border-radius: 14px;
+      margin-top: 6px;
+      background: #fff;
+      color: #0a0a0a;
+      border: none;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all .3s cubic-bezier(.4, 0, .2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .contact-card .btn-submit:hover:not(:disabled) {
+      background: rgba(255,255,255,.88);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255,255,255,.06);
+    }
+
+    .contact-card .btn-submit:disabled {
+      opacity: .7;
+      cursor: not-allowed;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(10,10,10,.2);
+      border-top-color: #0a0a0a;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Form status messages */
+    .form-status {
+      text-align: center;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-size: .88rem;
+      font-weight: 500;
+      margin-top: 16px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all .4s ease;
+    }
+
+    .form-status.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .form-status.success {
+      background: rgba(34, 197, 94, .08);
+      border: 1px solid rgba(34, 197, 94, .2);
+      color: #4ade80;
+    }
+
+    .form-status.error {
+      background: rgba(239, 68, 68, .08);
+      border: 1px solid rgba(239, 68, 68, .2);
+      color: #f87171;
+    }
+
+    /* ── Footer ───────────────────────────────────────── */
+    .footer {
+      border-top: 1px solid rgba(255,255,255,.05);
+      padding: 36px 0;
+      text-align: center;
+    }
+
+    .footer-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+
+    .footer p {
+      font-size: .82rem;
+      color: #444;
+      margin: 0;
+    }
+
+    .footer-instagram {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .82rem;
+      color: #444;
+      text-decoration: none;
+      transition: color .3s ease;
+    }
+
+    .footer-instagram:hover {
+      color: #E1306C;
+    }
+
+    .footer-instagram svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    /* ── Fade-in animation ────────────────────────────── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity .8s cubic-bezier(.4, 0, .2, 1), transform .8s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Staggered children */
+    .fade-in-stagger > .fade-in:nth-child(1) { transition-delay: 0s; }
+    .fade-in-stagger > .fade-in:nth-child(2) { transition-delay: .1s; }
+    .fade-in-stagger > .fade-in:nth-child(3) { transition-delay: .2s; }
+    .fade-in-stagger > .fade-in:nth-child(4) { transition-delay: .3s; }
+
+    /* ── Responsive ───────────────────────────────────── */
+    @media (max-width: 768px) {
+      .menu-toggle { display: flex; }
+
+      .navbar .container {
+        justify-content: space-between;
+      }
+
+      .nav-links {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        height: 100dvh;
+        background: rgba(14,14,14,.97);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 80px 32px 32px;
+        gap: 24px;
+        transition: right .35s cubic-bezier(.4, 0, .2, 1);
+        border-left: 1px solid rgba(255,255,255,.06);
+        z-index: 200;
+      }
+
+      .nav-links.open { right: 0; }
+
+      .nav-links .nav-cta a {
+        display: block;
+        text-align: center;
+        width: 100%;
+        margin-top: 12px;
+      }
+
+      .hero { padding: 100px 20px 60px; min-height: auto; }
+
+      .contact-card { padding: 32px 24px; }
+
+      section { padding: 72px 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Ambient background glow ─────────────────── -->
+  <div class="bg-glow">
+    <div class="bg-glow__layer"></div>
+    <div class="bg-glow__layer"></div>
+    <div class="bg-glow__layer"></div>
+  </div>
+
+  <!-- ─── Navbar ─────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="container">
+      <a href="#" class="navbar-logo">
+        <img src="fotky/logo.png" alt="Webora" />
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#sluzby">Služby</a></li>
+        <li><a href="#proc-webora">Proč Webora</a></li>
+        <li class="nav-cta"><a href="#kontakt">Kontakt</a></li>
+      </ul>
+      <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ─── Hero ───────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-content fade-in">
+      <div class="hero-badge">✦ <span>Webová agentura nové generace</span></div>
+      <h1>Tvoříme weby na&nbsp;míru</h1>
+      <p>Navrhujeme moderní webové stránky pro firmy a&nbsp;značky, které chtějí růst online.</p>
+      <div class="hero-buttons">
+        <a href="#kontakt" class="btn btn-primary">Kontakty</a>
+        <a href="#sluzby" class="btn btn-secondary">Naše služby</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Features ───────────────────────────────── -->
+  <section id="sluzby">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-label">Naše služby</span>
+        <h2 class="section-title">Co pro vás můžeme udělat</h2>
+        <p class="section-desc">Děláme weby, které vypadají skvěle, fungují rychle a&nbsp;přinášejí výsledky.</p>
+      </div>
+      <div class="features-grid fade-in-stagger">
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          </div>
+          <h3>Moderní design</h3>
+          <p>Čisté a&nbsp;elegantní rozhraní, které zaujme na první pohled a&nbsp;buduje důvěru u&nbsp;vašich zákazníků.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3>Rychlost a&nbsp;optimalizace</h3>
+          <p>Weby optimalizované pro rychlé načítání a&nbsp;nejlepší pozice ve vyhledávačích.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12" y2="18.01"/></svg>
+          </div>
+          <h3>Responzivita</h3>
+          <p>Perfektní zobrazení na všech zařízeních — od&nbsp;mobilu přes tablet až po&nbsp;desktop.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <h3>Individuální přístup</h3>
+          <p>Každý projekt řešíme na míru vašim potřebám a&nbsp;cílům. Žádné šablony.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Why Webora ─────────────────────────────── -->
+  <section id="proc-webora">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-label">Proč Webora</span>
+        <h2 class="section-title">Proč si vybrat právě nás</h2>
+        <p class="section-desc">Kombinujeme design, technologii a&nbsp;strategii, abychom dodali web, který opravdu funguje.</p>
+      </div>
+      <div class="features-grid fade-in-stagger">
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h3>Měřitelné výsledky</h3>
+          <p>Sledujeme data a&nbsp;optimalizujeme váš web tak, aby přinášel reálné konverze.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3>Rychlé dodání</h3>
+          <p>Efektivní proces nám umožňuje dodat kvalitní web v&nbsp;krátkém čase bez kompromisů.</p>
+        </div>
+
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Dlouhodobá podpora</h3>
+          <p>Po&nbsp;spuštění webu vás nenecháme na holičkách. Jsme tu pro vás i&nbsp;po&nbsp;dokončení projektu.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Contact ────────────────────────────────── -->
+  <section class="contact" id="kontakt">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-label">Kontakt</span>
+        <h2 class="section-title">Pojďme spolupracovat</h2>
+        <p class="section-desc">Napište nám a&nbsp;my se vám ozveme do 24&nbsp;hodin.</p>
+      </div>
+      <div class="contact-card fade-in">
+        <form id="contactForm">
+          <div class="form-group">
+            <label for="contactName">Jméno</label>
+            <input type="text" id="contactName" placeholder="Vaše jméno" required />
+          </div>
+          <div class="form-group">
+            <label for="contactEmail">E-mail</label>
+            <input type="email" id="contactEmail" placeholder="vas@email.cz" required />
+          </div>
+          <div class="form-group">
+            <label for="subject">Předmět</label>
+            <input type="text" id="subject" placeholder="Předmět zprávy" required />
+          </div>
+          <div class="form-group">
+            <label for="message">Zpráva</label>
+            <textarea id="message" name="message" placeholder="Popište váš projekt…" required></textarea>
+          </div>
+          <button type="submit" class="btn-submit" id="submitBtn">Odeslat poptávku</button>
+        </form>
+        <div class="form-status" id="formStatus"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Footer ─────────────────────────────────── -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <p>&copy; 2026 Webora</p>
+        <a href="https://www.instagram.com/vfagency/" target="_blank" rel="noopener noreferrer" class="footer-instagram">
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.17.054 1.97.24 2.43.403a4.088 4.088 0 0 1 1.518.988 4.088 4.088 0 0 1 .988 1.518c.163.46.349 1.26.404 2.43.058 1.266.069 1.646.069 4.85s-.012 3.584-.07 4.85c-.054 1.17-.24 1.97-.403 2.43a4.088 4.088 0 0 1-.988 1.518 4.088 4.088 0 0 1-1.518.988c-.46.163-1.26.349-2.43.404-1.266.058-1.646.069-4.85.069s-3.584-.012-4.85-.07c-1.17-.054-1.97-.24-2.43-.403a4.088 4.088 0 0 1-1.518-.988 4.088 4.088 0 0 1-.988-1.518c-.163-.46-.349-1.26-.404-2.43C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.85c.054-1.17.24-1.97.403-2.43a4.088 4.088 0 0 1 .988-1.518 4.088 4.088 0 0 1 1.518-.988c.46-.163 1.26-.349 2.43-.404C8.416 2.175 8.796 2.163 12 2.163M12 0C8.741 0 8.333.014 7.053.072 5.775.13 4.902.333 4.14.63a6.21 6.21 0 0 0-2.244 1.46A6.21 6.21 0 0 0 .436 4.34C.139 5.102-.064 5.975.008 7.253.07 8.533.014 8.941 0 12s.014 3.467.072 4.747c.058 1.278.261 2.15.558 2.913a6.21 6.21 0 0 0 1.46 2.244 6.21 6.21 0 0 0 2.25 1.46c.762.297 1.636.5 2.913.558C8.533 23.986 8.941 24 12 24s3.467-.014 4.747-.072c1.278-.058 2.15-.261 2.913-.558a6.21 6.21 0 0 0 2.244-1.46 6.21 6.21 0 0 0 1.46-2.25c.297-.762.5-1.636.558-2.913.058-1.28.072-1.688.072-4.947s-.014-3.467-.072-4.747c-.058-1.278-.261-2.15-.558-2.913a6.21 6.21 0 0 0-1.46-2.244A6.21 6.21 0 0 0 19.66.436C18.898.139 18.025-.064 16.747.008 15.467.07 15.059.014 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+          Instagram
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ─── Scripts ────────────────────────────────── -->
+  <script>
+    // ── EmailJS init ──────────────────────────────────
+    // SETUP INSTRUCTIONS:
+    // 1. Go to https://www.emailjs.com/ and create a free account
+    // 2. Add an email service (Gmail, Outlook, etc.) — copy the Service ID
+    // 3. Create an email template with variables: {{from_name}}, {{reply_to}}, {{message}}
+    //    Set the template "To Email" to: filahofer82@gmail.com
+    //    Copy the Template ID
+    // 4. Go to Account > General and copy your Public Key
+    // 5. Replace the three values below:
+    const EMAILJS_PUBLIC_KEY = 'YKBW6jXzsaXh6mNZA';
+    const EMAILJS_SERVICE_ID = 'service_6d8icgl';
+    const EMAILJS_TEMPLATE_ID = 'template_rvsb6qf';
+
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+
+    // ── Navbar scroll → floating pill ─────────────────
+    const navbar = document.querySelector('.navbar');
+    let lastScrolled = false;
+
+    function handleScroll() {
+      const scrolled = window.scrollY > 60;
+      if (scrolled !== lastScrolled) {
+        navbar.classList.toggle('scrolled', scrolled);
+        lastScrolled = scrolled;
+      }
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    // ── Mobile menu ───────────────────────────────────
+    const menuToggle = document.getElementById('menuToggle');
+    const navLinks = document.getElementById('navLinks');
+
+    menuToggle.addEventListener('click', () => {
+      navLinks.classList.toggle('open');
+    });
+
+    navLinks.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => navLinks.classList.remove('open'));
+    });
+
+    // ── Scroll reveal (fade-in + stagger) ─────────────
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // ── 3D tilt + glow on cards ──────────────────────
+    const tiltCards = document.querySelectorAll('.contact-card');
+    const MAX_ROTATION_CARD = 6;  // for small feature cards
+    const MAX_ROTATION_CONTACT = 1.3; // much subtler for the large contact card
+    const SCALE_HOVER = 1.03;
+
+    tiltCards.forEach(card => {
+      let raf;
+
+      card.addEventListener('mousemove', (e) => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(() => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+
+          // Rotation: use less tilt for the contact card
+          const maxRot = card.classList.contains('contact-card') ? MAX_ROTATION_CONTACT : MAX_ROTATION_CARD;
+          const rotateY = ((x - centerX) / centerX) * maxRot;
+          const rotateX = ((centerY - y) / centerY) * maxRot;
+
+          card.style.transform =
+            `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(${SCALE_HOVER},${SCALE_HOVER},1)`;
+
+          // Glow follows cursor
+          card.style.setProperty('--mouse-x', x + 'px');
+          card.style.setProperty('--mouse-y', y + 'px');
+        });
+      });
+
+      card.addEventListener('mouseleave', () => {
+        cancelAnimationFrame(raf);
+        card.style.transition = 'transform .5s cubic-bezier(.4,0,.2,1), border-color .4s ease, box-shadow .4s ease, background .4s ease';
+        card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)';
+        // Reset transition after animation completes
+        setTimeout(() => {
+          card.style.transition = 'border-color .4s ease, box-shadow .4s ease, background .4s ease';
+        }, 500);
+      });
+
+      card.addEventListener('mouseenter', () => {
+        card.style.transition = 'border-color .4s ease, box-shadow .4s ease, background .4s ease';
+      });
+    });
+
+    // ── Contact form with EmailJS ─────────────────────
+    const contactForm = document.getElementById('contactForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const formStatus = document.getElementById('formStatus');
+
+    function showStatus(type, message) {
+      formStatus.className = 'form-status ' + type;
+      formStatus.textContent = message;
+      // Force reflow for animation
+      void formStatus.offsetWidth;
+      formStatus.classList.add('show');
+
+      if (type === 'success') {
+        setTimeout(() => {
+          formStatus.classList.remove('show');
+        }, 5000);
+      }
+    }
+
+    contactForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // Read values by ID
+      const fromName = document.getElementById('contactName').value.trim();
+      const replyTo = document.getElementById('contactEmail').value.trim();
+      const subject = document.getElementById('subject').value.trim();
+      const message = document.getElementById('message').value.trim();
+
+      if (!fromName || !replyTo || !subject || !message) {
+        showStatus('error', 'Vyplňte prosím všechna pole.');
+        return;
+      }
+
+      console.log({ fromName, replyTo, subject, message });
+
+      // Loading state
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> Odesílám…';
+      formStatus.classList.remove('show');
+
+      try {
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+          from_name: fromName,
+          reply_to: replyTo,
+          subject: subject,
+          message: message
+        });
+        showStatus('success', 'Zpráva byla úspěšně odeslána. Ozveme se vám co nejdříve!');
+        contactForm.reset();
+      } catch (err) {
+        console.error('EmailJS error:', err);
+        showStatus('error', 'Něco se pokazilo. Zkuste to prosím znovu nebo nás kontaktujte přímo e-mailem.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Odeslat poptávku';
+      }
+    });
+  </script>
+
+</body>
+</html>
