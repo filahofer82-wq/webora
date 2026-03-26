@@ -6,8 +6,6 @@
   <title>Webora – Tvoříme weby na míru</title>
   <link rel="icon" href="fotky/logo.png" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     /* ── Reset & Base ───────────────────────────────── */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -597,126 +595,12 @@
       opacity: 1;
     }
 
-    .form-group { margin-bottom: 22px; }
-
-    .form-group label {
-      display: block;
-      font-size: .82rem;
-      font-weight: 500;
-      color: #888;
-      margin-bottom: 8px;
-      letter-spacing: .01em;
-    }
-
-    .form-group input,
-    .form-group textarea {
-      width: 100%;
-      padding: 13px 16px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.07);
-      background: rgba(255,255,255,.03);
-      color: #e5e5e5;
-      font-size: .92rem;
-      font-family: inherit;
-      outline: none;
-      transition: all .3s cubic-bezier(.4, 0, .2, 1);
-    }
-
-    .form-group input::placeholder,
-    .form-group textarea::placeholder {
-      color: #444;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
-      border-color: rgba(255,255,255,.2);
-      box-shadow: 0 0 0 4px rgba(255,255,255,.03);
-      background: rgba(255,255,255,.04);
-    }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 120px;
-    }
-
-    /* Validation styles */
-    .form-group input:invalid:not(:placeholder-shown),
-    .form-group textarea:invalid:not(:placeholder-shown) {
-      border-color: rgba(239, 68, 68, .4);
-    }
-
-    .contact-card .btn-submit {
-      width: 100%;
-      padding: 14px;
-      font-size: .95rem;
-      border-radius: 14px;
-      margin-top: 6px;
-      background: #fff;
-      color: #0a0a0a;
-      border: none;
-      font-family: inherit;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all .3s cubic-bezier(.4, 0, .2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .contact-card .btn-submit:hover:not(:disabled) {
-      background: rgba(255,255,255,.88);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(255,255,255,.06);
-    }
-
-    .contact-card .btn-submit:disabled {
-      opacity: .7;
-      cursor: not-allowed;
-    }
-
-    /* Spinner */
-    .spinner {
-      width: 18px;
-      height: 18px;
-      border: 2px solid rgba(10,10,10,.2);
-      border-top-color: #0a0a0a;
-      border-radius: 50%;
-      animation: spin .6s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Form status messages */
-    .form-status {
+    .contact-card .contact-placeholder {
       text-align: center;
-      padding: 14px 18px;
-      border-radius: 12px;
-      font-size: .88rem;
-      font-weight: 500;
-      margin-top: 16px;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: all .4s ease;
-    }
-
-    .form-status.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .form-status.success {
-      background: rgba(34, 197, 94, .08);
-      border: 1px solid rgba(34, 197, 94, .2);
-      color: #4ade80;
-    }
-
-    .form-status.error {
-      background: rgba(239, 68, 68, .08);
-      border: 1px solid rgba(239, 68, 68, .2);
-      color: #f87171;
+      padding: 40px 20px;
+      color: #555;
+      font-size: .95rem;
+      line-height: 1.7;
     }
 
     /* ── Footer ───────────────────────────────────────── */
@@ -961,37 +845,13 @@
         font-size: .84rem;
       }
 
-      /* ── Contact form mobile ── */
+      /* ── Contact mobile ── */
       .contact { padding-bottom: 80px; }
 
       .contact-card {
         padding: 28px 20px;
         border-radius: 20px;
         max-width: 100%;
-      }
-
-      .form-group { margin-bottom: 18px; }
-
-      .form-group input,
-      .form-group textarea {
-        padding: 12px 14px;
-        font-size: .9rem;
-        border-radius: 10px;
-      }
-
-      .form-group textarea {
-        min-height: 100px;
-      }
-
-      .contact-card .btn-submit {
-        padding: 13px;
-        font-size: .9rem;
-        border-radius: 12px;
-      }
-
-      .form-status {
-        font-size: .82rem;
-        padding: 12px 14px;
       }
 
       /* ── Footer mobile ── */
@@ -1159,26 +1019,7 @@
         <p class="section-desc">Napište nám a&nbsp;my se vám ozveme do 24&nbsp;hodin.</p>
       </div>
       <div class="contact-card fade-in">
-        <form id="contactForm">
-          <div class="form-group">
-            <label for="contactName">Jméno</label>
-            <input type="text" id="contactName" placeholder="Vaše jméno" required />
-          </div>
-          <div class="form-group">
-            <label for="contactEmail">E-mail</label>
-            <input type="email" id="contactEmail" placeholder="vas@email.cz" required />
-          </div>
-          <div class="form-group">
-            <label for="subject">Předmět</label>
-            <input type="text" id="subject" placeholder="Předmět zprávy" required />
-          </div>
-          <div class="form-group">
-            <label for="message">Zpráva</label>
-            <textarea id="message" name="message" placeholder="Popište váš projekt…" required></textarea>
-          </div>
-          <button type="submit" class="btn-submit" id="submitBtn">Odeslat poptávku</button>
-        </form>
-        <div class="form-status" id="formStatus"></div>
+        <p class="contact-placeholder">Kontaktní formulář bude brzy dostupný.</p>
       </div>
     </div>
   </section>
@@ -1198,21 +1039,6 @@
 
   <!-- ─── Scripts ────────────────────────────────── -->
   <script>
-    // ── EmailJS init ──────────────────────────────────
-    // SETUP INSTRUCTIONS:
-    // 1. Go to https://www.emailjs.com/ and create a free account
-    // 2. Add an email service (Gmail, Outlook, etc.) — copy the Service ID
-    // 3. Create an email template with variables: {{from_name}}, {{reply_to}}, {{message}}
-    //    Set the template "To Email" to: filahofer82@gmail.com
-    //    Copy the Template ID
-    // 4. Go to Account > General and copy your Public Key
-    // 5. Replace the three values below:
-    const EMAILJS_PUBLIC_KEY = 'YKBW6jXzsaXh6mNZA';
-    const EMAILJS_SERVICE_ID = 'service_6d8icgl';
-    const EMAILJS_TEMPLATE_ID = 'template_rvsb6qf';
-
-    emailjs.init(EMAILJS_PUBLIC_KEY);
-
     // ── Navbar scroll → floating pill ─────────────────
     const navbar = document.querySelector('.navbar');
     let lastScrolled = false;
@@ -1397,103 +1223,6 @@
       starObserver.observe(section);
     })();
 
-    // ── Contact form with EmailJS + 1h cooldown ───────
-    const contactForm = document.getElementById('contactForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const formStatus = document.getElementById('formStatus');
-    const COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
-    let cooldownTimer = null;
-
-    function showStatus(type, message) {
-      formStatus.className = 'form-status ' + type;
-      formStatus.textContent = message;
-      void formStatus.offsetWidth;
-      formStatus.classList.add('show');
-    }
-
-    function getRemainingMs() {
-      try {
-        const last = parseInt(localStorage.getItem('lastFormSubmit'), 10);
-        if (!last || isNaN(last)) return 0;
-        const remaining = COOLDOWN_MS - (Date.now() - last);
-        return remaining > 0 ? remaining : 0;
-      } catch { return 0; }
-    }
-
-    function formatMin(ms) {
-      return Math.ceil(ms / 60000);
-    }
-
-    function startCooldown(isPageLoad) {
-      clearInterval(cooldownTimer);
-      submitBtn.disabled = true;
-
-      function tick() {
-        const remaining = getRemainingMs();
-        if (remaining <= 0) {
-          clearInterval(cooldownTimer);
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = 'Odeslat poptávku';
-          formStatus.classList.remove('show');
-          return;
-        }
-        const min = formatMin(remaining);
-        submitBtn.innerHTML = `Počkejte ${min} min`;
-        const msg = isPageLoad
-          ? `Zpráva už byla odeslána. Další můžeš poslat za ${min} min.`
-          : `Další zprávu můžeš poslat za ${min} min.`;
-        showStatus('success', msg);
-      }
-
-      tick();
-      cooldownTimer = setInterval(tick, 10000);
-    }
-
-    // Check cooldown on page load
-    if (getRemainingMs() > 0) {
-      startCooldown(true);
-    }
-
-    contactForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      if (getRemainingMs() > 0) {
-        startCooldown(false);
-        return;
-      }
-
-      const fromName = document.getElementById('contactName').value.trim();
-      const replyTo = document.getElementById('contactEmail').value.trim();
-      const subject = document.getElementById('subject').value.trim();
-      const message = document.getElementById('message').value.trim();
-
-      if (!fromName || !replyTo || !subject || !message) {
-        showStatus('error', 'Vyplňte prosím všechna pole.');
-        return;
-      }
-
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="spinner"></span> Odesílám…';
-      formStatus.classList.remove('show');
-
-      try {
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-          from_name: fromName,
-          reply_to: replyTo,
-          subject: subject,
-          message: message
-        });
-        localStorage.setItem('lastFormSubmit', Date.now().toString());
-        showStatus('success', 'Zpráva byla úspěšně odeslána. Ozveme se vám co nejdříve!');
-        contactForm.reset();
-        setTimeout(() => startCooldown(false), 3000);
-      } catch (err) {
-        console.error('EmailJS error:', err);
-        showStatus('error', 'Něco se pokazilo. Zkuste to prosím znovu nebo nás kontaktujte přímo e-mailem.');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Odeslat poptávku';
-      }
-    });
   </script>
 
 </body>
