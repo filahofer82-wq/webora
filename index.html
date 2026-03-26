@@ -1397,29 +1397,71 @@
       starObserver.observe(section);
     })();
 
-    // ── Contact form with EmailJS ─────────────────────
+    // ── Contact form with EmailJS + 1h cooldown ───────
     const contactForm = document.getElementById('contactForm');
     const submitBtn = document.getElementById('submitBtn');
     const formStatus = document.getElementById('formStatus');
+    const COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
+    let cooldownTimer = null;
 
     function showStatus(type, message) {
       formStatus.className = 'form-status ' + type;
       formStatus.textContent = message;
-      // Force reflow for animation
       void formStatus.offsetWidth;
       formStatus.classList.add('show');
+    }
 
-      if (type === 'success') {
-        setTimeout(() => {
+    function getRemainingMs() {
+      try {
+        const last = parseInt(localStorage.getItem('lastFormSubmit'), 10);
+        if (!last || isNaN(last)) return 0;
+        const remaining = COOLDOWN_MS - (Date.now() - last);
+        return remaining > 0 ? remaining : 0;
+      } catch { return 0; }
+    }
+
+    function formatMin(ms) {
+      return Math.ceil(ms / 60000);
+    }
+
+    function startCooldown(isPageLoad) {
+      clearInterval(cooldownTimer);
+      submitBtn.disabled = true;
+
+      function tick() {
+        const remaining = getRemainingMs();
+        if (remaining <= 0) {
+          clearInterval(cooldownTimer);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Odeslat poptávku';
           formStatus.classList.remove('show');
-        }, 5000);
+          return;
+        }
+        const min = formatMin(remaining);
+        submitBtn.innerHTML = `Počkejte ${min} min`;
+        const msg = isPageLoad
+          ? `Zpráva už byla odeslána. Další můžeš poslat za ${min} min.`
+          : `Další zprávu můžeš poslat za ${min} min.`;
+        showStatus('success', msg);
       }
+
+      tick();
+      cooldownTimer = setInterval(tick, 10000);
+    }
+
+    // Check cooldown on page load
+    if (getRemainingMs() > 0) {
+      startCooldown(true);
     }
 
     contactForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // Read values by ID
+      if (getRemainingMs() > 0) {
+        startCooldown(false);
+        return;
+      }
+
       const fromName = document.getElementById('contactName').value.trim();
       const replyTo = document.getElementById('contactEmail').value.trim();
       const subject = document.getElementById('subject').value.trim();
@@ -1430,9 +1472,6 @@
         return;
       }
 
-      console.log({ fromName, replyTo, subject, message });
-
-      // Loading state
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<span class="spinner"></span> Odesílám…';
       formStatus.classList.remove('show');
@@ -1444,12 +1483,13 @@
           subject: subject,
           message: message
         });
+        localStorage.setItem('lastFormSubmit', Date.now().toString());
         showStatus('success', 'Zpráva byla úspěšně odeslána. Ozveme se vám co nejdříve!');
         contactForm.reset();
+        setTimeout(() => startCooldown(false), 3000);
       } catch (err) {
         console.error('EmailJS error:', err);
         showStatus('error', 'Něco se pokazilo. Zkuste to prosím znovu nebo nás kontaktujte přímo e-mailem.');
-      } finally {
         submitBtn.disabled = false;
         submitBtn.innerHTML = 'Odeslat poptávku';
       }
